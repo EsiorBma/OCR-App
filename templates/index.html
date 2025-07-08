@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Premium - Extraction de texte</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='ocr.ico') }}" type="image/x-icon">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+            const fileInput = document.getElementById('fileInput');
+            const dropArea = document.querySelector('.drop-area');
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
+            const downloadContainer = document.getElementById('downloadContainer');
+            const downloadLink = document.getElementById('downloadLink');
+            const fileNameDisplay = document.getElementById('fileName');
+            const resetBtn = document.getElementById('resetBtn');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileError = document.getElementById('fileError');
+
+            // Désactiver le bouton au démarrage
+            submitBtn.disabled = true;
+
+            // Gestion du glisser-déposer
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropArea.classList.add('highlight');
+            }
+
+            function unhighlight() {
+                dropArea.classList.remove('highlight');
+            }
+
+            // Gestion du dépôt de fichier
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileSelection(files[0]);
+                }
+            }
+
+            // Gestion de la sélection de fichier
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    handleFileSelection(fileInput.files[0]);
+                }
+            });
+
+            function handleFileSelection(file) {
+                // Vérifier la taille du fichier
+                if (file.size > 10 * 1024 * 1024) {
+                    showError('Le fichier est trop volumineux (max 10MB)');
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // Vérifier l'extension
+                const ext = file.name.split('.').pop().toLowerCase();
+                const validExts = ['png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx'];
+                if (!validExts.includes(ext)) {
+                    showError('Format de fichier non supporté');
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // Afficher les informations du fichier
+                fileInfo.innerHTML = `
+                    <div class="file-preview">
+                        <span class="file-icon">📄</span>
+                        <div class="file-details">
+                            <strong>${file.name}</strong>
+                            <span>${formatFileSize(file.size)}</span>
+                        </div>
+                        <button class="remove-file" onclick="removeFile()">✕</button>
+                    </div>
+                `;
+                
+                fileError.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
+            function showError(message) {
+                fileError.textContent = message;
+                fileError.style.display = 'block';
+                fileInfo.innerHTML = '';
+            }
+
+            function removeFile() {
+                fileInput.value = '';
+                fileInfo.innerHTML = '';
+                submitBtn.disabled = true;
+                fileError.style.display = 'none';
+            }
+
+            // Soumission du formulaire
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!fileInput.files.length) {
+                    showError('Veuillez sélectionner un fichier');
+                    return;
+                }
+
+                // Afficher la progression
+                submitBtn.disabled = true;
+                progressContainer.style.display = 'block';
+                downloadContainer.style.display = 'none';
+                
+                // Animation de progression
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                    }
+                }, 200);
+
+                // Envoyer le fichier
+                const formData = new FormData(form);
+                
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Afficher le lien de téléchargement
+                        downloadLink.href = data.download_url;
+                        fileNameDisplay.textContent = data.filename;
+                        downloadContainer.style.display = 'block';
+                    } else {
+                        throw new Error(data.error || 'Erreur lors du traitement');
+                    }
+                } catch (error) {
+                    showError(`Erreur: ${error.message}`);
+                } finally {
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }
+            });
+
+            // Réinitialiser le formulaire
+            resetBtn.addEventListener('click', () => {
+                fileInput.value = '';
+                fileInfo.innerHTML = '';
+                downloadContainer.style.display = 'none';
+                submitBtn.disabled = true;
+                fileError.style.display = 'none';
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OCR<span>Premium</span></h1>
+            <p>Transformez vos images, PDF et PowerPoint en texte éditable</p>
+        </header>
+        
+        <main>
+            <div class="upload-box">
+                <form id="uploadForm">
+                    <input type="file" id="fileInput" name="file" accept=".png,.jpg,.jpeg,.pdf,.ppt,.pptx" required>
+                    <label for="fileInput">
+                        <div class="drop-area">
+                            <img src="https://cdn-icons-png.flaticon.com/512/892/892781.png" alt="upload" class="upload-icon">
+                            <p>Glissez-déposez un fichier ou <span>parcourir</span></p>
+                            <small>Formats supportés: PNG, JPG, PDF, PPT (Max 10MB)</small>
+                        </div>
+                    </label>
+                    
+                    <div id="fileInfo" class="file-info"></div>
+                    <div id="fileError" class="file-error" style="display: none;"></div>
+                    
+                    <div id="progressContainer" style="display: none; margin: 20px 0;">
+                        <div style="background: #333; border-radius: 10px; height: 10px;">
+                            <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(45deg, #6a11cb, #2575fc); border-radius: 10px; transition: width 0.3s;"></div>
+                        </div>
+                        <p style="text-align: center; margin-top: 10px;">Traitement en cours...</p>
+                    </div>
+                    
+                    <div id="downloadContainer" style="display: none; text-align: center; margin: 20px 0; padding: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 10px;">
+                        <p>Votre fichier est prêt : <span id="fileName"></span></p>
+                        <a id="downloadLink" class="download-btn">Télécharger le texte</a>
+                        <button id="resetBtn" class="reset-btn">Nouvelle extraction</button>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn">Extraire le texte</button>
+                </form>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <div class="icon">📸</div>
+                    <h3>Images</h3>
+                    <p>JPG, PNG, etc.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📄</div>
+                    <h3>PDF</h3>
+                    <p>Documents PDF</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h3>PowerPoint</h3>
+                    <p>PPT et PPTX</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Développé avec ♥ pour les étudiants | OCR Premium v2.0</p>
+        </footer>
+    </div>
+</body>
+</html>

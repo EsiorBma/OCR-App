@@ -1,0 +1,197 @@
+Examen : Séries et intégrales généralisées
+UCAO-UUT
+2024-2025
+Durée : 2 heures
+Étudiant : Ambroise KOUWADAN
+Question 1
+Déterminer la nature de la série de terme général un = ln(1 + e−2n)
+Analyse :
+La série est P+∞
+n=0 un avec un = ln(1 + e−2n) > 0.
+Équivalent :
+Pour n →+∞, e−2n →0, donc :
+ln(1 + e−2n) ∼e−2n
+Comparaison :
+La série P e−2n est géométrique de raison r = e−2 < 1, donc convergente.
+Conclusion :
+Par équivalence et critère de comparaison pour les séries à termes positifs, la série P un converge.
+Question 2
+Étudier la convergence de fn(x) = n2xe−nx pour x ≥0
+Convergence simple :
+Pour tout x ≥0 fixé :
+lim
+n→+∞fn(x) =
+(
+0
+si x > 0
+0
+si x = 0
+La suite converge simplement vers la fonction nulle sur [0, +∞[.
+Convergence uniforme :
+Calculons la norme infinie :
+∥fn −0∥∞= sup
+x≥0
+|fn(x)| = fn
+ 1
+n
+
+= n
+e −−−−−→
+n→+∞+∞
+Puisque ∥fn∥∞̸→0, il n’y a pas de convergence uniforme sur [0, +∞[.
+Question 3
+Rayon de convergence de 1 +
+x
+3×2 +
+x2
+32×3 +
+x3
+33×4 + · · ·
+Solution
+Terme général :
+an =
+1
+3n(n + 1),
+n ≥0
+1
+Critère de d’Alembert :
+|an+1|
+|an|
+=
+1
+3n+1(n+2)
+1
+3n(n+1)
+=
+n + 1
+3(n + 2)
+lim
+n→+∞
+|an+1|
+|an|
+= 1
+3
+Conclusion :
+Le rayon de convergence est R = 3.
+Question 4
+Développer en série entière f(x) = ex2
+Utilisation du développement connu :
+ey =
++∞
+X
+k=0
+yk
+k!
+∀y ∈R
+Substitution :
+f(x) = ex2 =
++∞
+X
+k=0
+(x2)k
+k!
+=
++∞
+X
+k=0
+x2k
+k!
+Validité :
+Le développement est valable pour tout x ∈R.
+Question 5
+Déterminer S = 1 + 3x + 5x2 + 7x3 + · · ·
+Expression générale :
+S(x) =
++∞
+X
+n=0
+(2n + 1)xn
+Décomposition :
+S(x) = 2
++∞
+X
+n=0
+nxn
+|
+{z
+}
+S1
++
++∞
+X
+n=0
+xn
+| {z }
+S2
+Calculs :
+S2 =
+1
+1 −x
+(|x| < 1)
+S1 =
++∞
+X
+n=1
+nxn = x d
+dx
+ +∞
+X
+n=0
+xn
+!
+= x d
+dx
+
+1
+1 −x
+
+=
+x
+(1 −x)2
+Somme finale :
+S(x) = 2 ·
+x
+(1 −x)2 +
+1
+1 −x = 2x + 1 −x
+(1 −x)2
+=
+1 + x
+(1 −x)2
+Valable pour |x| < 1.
+2
+Question 6
+Étudier la convergence des intégrales
+1.
+R +∞
+0
+dt
+et−1
+Problèmes en 0+ et +∞
+— En +∞:
+1
+et−1 ∼e−t, intégrale convergente
+— En 0+ :
+1
+et−1 ∼1
+t , divergence (Riemann)
+Conclusion : Divergence (problème en 0)
+2.
+R +∞
+0
+ln t
+t2+1dt
+Problèmes en 0+ (t →0) et +∞
+— En +∞:
+ ln t
+t2+1
+ ≤ln t
+t2 ∼o(t−3/2), convergence
+— En 0+ :
+ln t
+t2+1 ∼ln t, et
+R 1
+0 ln tdt = [−t ln t + t]1
+0 = −1, convergence
+Conclusion : Convergence
+3
