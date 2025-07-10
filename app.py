@@ -10,8 +10,8 @@ from pptx import Presentation
 import io
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB max
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15MB max
 
 # Vérification de l'installation de Tesseract
 try:
@@ -128,4 +128,4 @@ def download(session_id, filename):
 
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    app.run(debug=True)
+    app.run(debug=False)
