@@ -10,32 +10,21 @@ from pptx import Presentation
 import io
 
 app = Flask(__name__)
-# Configuration spécifique à Render
-if 'RENDER' in os.environ:
-    app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
-    # Configurer le chemin de Tesseract pour Render
-    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
-else:
-    app.config['UPLOAD_FOLDER'] = 'uploads'
-
+# Chemin pour les uploads
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15MB max
+
+# Configurer le chemin de Tesseract pour Docker
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 # Vérification de l'installation de Tesseract
 try:
-    # Vérifier la version de Tesseract
     tesseract_version = pytesseract.get_tesseract_version()
     print(f"Tesseract version: {tesseract_version}")
 except EnvironmentError:
     print("Tesseract n'est pas installé ou n'est pas dans le PATH.")
-    # Essayer de trouver le chemin alternatif
-    try:
-        pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
-        tesseract_version = pytesseract.get_tesseract_version()
-        print(f"Tesseract version (après correction): {tesseract_version}")
-    except:
-        print("Échec de la correction du chemin Tesseract")
-        sys.exit("Erreur: Tesseract requis - installez-le avec 'sudo apt install tesseract-ocr tesseract-ocr-fra'")
-        
+    sys.exit("Erreur: Tesseract requis")    
+    
 def extract_text_from_image(image_path):
     try:
         img = Image.open(image_path)
