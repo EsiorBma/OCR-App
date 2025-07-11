@@ -14,17 +14,9 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15MB max
 
-# Configurer le chemin de Tesseract pour Docker
+# Configurer le chemin de Tesseract 
 pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
-# Vérification de l'installation de Tesseract
-try:
-    tesseract_version = pytesseract.get_tesseract_version()
-    print(f"Tesseract version: {tesseract_version}")
-except EnvironmentError:
-    print("Tesseract n'est pas installé ou n'est pas dans le PATH.")
-    sys.exit("Erreur: Tesseract requis")    
-    
 def extract_text_from_image(image_path):
     try:
         img = Image.open(image_path)
